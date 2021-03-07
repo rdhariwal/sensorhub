@@ -20,13 +20,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         self.send_response(HTTPStatus.OK)
         self.end_headers()
-        cur.execute("select temp from temperature")
+        cur.execute("select temp, date, source from temperature")
         row = cur.fetchone()
-        result = 'temp is: '+ str(row[0])
+        result = 'temp is: '+ str(row[0]) + ', date: '+ str(row[1])
         self.wfile.write(result.encode())
 
-
-httpd = socketserver.TCPServer(('', 80), Handler)
+httpd = socketserver.TCPServer(('', 80), Handler, bind_and_activate=False)
+httpd.allow_reuse_address = True
+httpd.server_bind()
+httpd.server_activate()
 httpd.serve_forever()
 
 # We can also close the connection if we are done with it.
